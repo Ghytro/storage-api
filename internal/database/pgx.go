@@ -11,7 +11,7 @@ type DB struct {
 	*pgx.ConnPool
 }
 
-func NewDBWithPgx(conf pgx.ConnPoolConfig) (DBI, error) {
+func NewDBWithPgx(conf pgx.ConnPoolConfig) (*DB, error) {
 	conn, err := pgx.NewConnPool(conf)
 	if err != nil {
 		return nil, err
@@ -65,19 +65,6 @@ func (db *DB) RunInTransaction(ctx context.Context, fn func(ctx TxContext) error
 		return txCtx.TX().Rollback()
 	}
 	return txCtx.TX().Commit()
-}
-
-type DBI interface {
-	Exec(query string, args ...interface{}) (pgx.CommandTag, error)
-	ExecContext(ctx context.Context, query string, args ...interface{}) (pgx.CommandTag, error)
-
-	Query(query string, args ...interface{}) (*pgx.Rows, error)
-	QueryContext(ctx context.Context, query string, args ...interface{}) (*pgx.Rows, error)
-
-	QueryRow(query string, args ...interface{}) *pgx.Row
-	QueryRowContext(ctx context.Context, query string, args ...interface{}) *pgx.Row
-
-	RunInTransaction(ctx context.Context, fn func(ctx TxContext) error) error
 }
 
 type Tx struct {
@@ -135,6 +122,7 @@ func WithTX(ctx context.Context, tx *Tx) TxContext {
 }
 
 type TxContext interface {
+	context.Context
 	TX() *Tx
 }
 
