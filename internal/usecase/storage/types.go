@@ -69,4 +69,5 @@ type StorageSchemaRespProduct struct {
 	Name   string `json:"name"`
 	Vendor string `json:"vendor"`
 	Size   string `json:"size"`
+	Amount uint   `json:"amount"`
 }

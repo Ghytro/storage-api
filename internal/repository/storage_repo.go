@@ -52,15 +52,7 @@ func (r *StorageRepository) ListStorages(ctx context.Context, isAvailable ...boo
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.Storage{}
-	for rows.Next() {
-		s := &entity.Storage{}
-		if err := s.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, s)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.Storage](rows)
 }
 
 func (r *StorageRepository) CreateStorage(ctx context.Context, storages ...*entity.Storage) ([]*entity.Storage, error) {
@@ -77,15 +69,7 @@ func (r *StorageRepository) CreateStorage(ctx context.Context, storages ...*enti
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.Storage{}
-	for rows.Next() {
-		p := &entity.Storage{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.Storage](rows)
 }
 
 func (r *StorageRepository) UpdateStorage(ctx context.Context, storages ...*entity.Storage) ([]*entity.Storage, error) {
@@ -104,15 +88,7 @@ func (r *StorageRepository) UpdateStorage(ctx context.Context, storages ...*enti
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.Storage{}
-	for rows.Next() {
-		p := &entity.Storage{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.Storage](rows)
 }
 
 func (r *StorageRepository) DeleteStorage(ctx context.Context, ids ...entity.PK) error {

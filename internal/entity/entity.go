@@ -29,7 +29,7 @@ type Product struct {
 	Vendor string `db:"vendor" json:"vendor"`
 	Size   string `db:"size" json:"size"`
 
-	Storage *Storage // relation
+	Storage *Storage `json:"-"` // relation
 }
 
 var _ IEntity = (*Product)(nil)
@@ -62,6 +62,17 @@ var _ IEntity = (*ProductReservation)(nil)
 
 func (pr *ProductReservation) Scan(rows *pgx.Rows) error {
 	return rows.Scan(&pr.ID, &pr.StorageID, &pr.ProductID, &pr.Amount)
+}
+
+func ScannedRows[T IEntity](rows *pgx.Rows) (result []T, err error) {
+	for rows.Next() {
+		var t T
+		if err = t.Scan(rows); err != nil {
+			return nil, err
+		}
+		result = append(result, t)
+	}
+	return
 }
 
 type IEntity interface {

@@ -29,15 +29,15 @@ func (r *ReservationsRepository) GetReservationByProduct(ctx context.Context, pr
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.ProductReservation{}
-	for rows.Next() {
-		r := &entity.ProductReservation{}
-		if err := r.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, r)
+	return entity.ScannedRows[*entity.ProductReservation](rows)
+}
+
+func (r *ReservationsRepository) GetReservationByStorage(ctx context.Context, storageIDs ...entity.PK) ([]*entity.ProductReservation, error) {
+	rows, err := r.DBI(ctx).QueryContext(ctx, "SELECT * FROM product_reservations WHERE storage_id IN ($1)", storageIDs)
+	if err != nil {
+		return nil, err
 	}
-	return result, nil
+	return entity.ScannedRows[*entity.ProductReservation](rows)
 }
 
 func (r *ReservationsRepository) GetReservation(ctx context.Context, id entity.PK) (*entity.ProductReservation, error) {
@@ -72,15 +72,7 @@ func (r *ReservationsRepository) CreateReservation(ctx context.Context, reservat
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.ProductReservation{}
-	for rows.Next() {
-		p := &entity.ProductReservation{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.ProductReservation](rows)
 }
 
 func (r *ReservationsRepository) UpdateReservation(ctx context.Context, reservations ...*entity.ProductReservation) ([]*entity.ProductReservation, error) {
@@ -90,23 +82,15 @@ func (r *ReservationsRepository) UpdateReservation(ctx context.Context, reservat
 	FROM (VALUES `)
 	argB := argBuilder{}
 	for _, r := range reservations {
-		argB.add(r.StorageID, r.ProductID, r.Amount)
+		argB.add(r.ID, r.Amount)
 	}
 	expr, args := argB.done()
-	q.WriteString(expr + ") AS c (storage_id, product_id, amount) WHERE c.storage_id = r.storage_id AND c.product_id = r.product_id RETURNING *")
+	q.WriteString(expr + ") AS c (id, amount) WHERE c.id = r.id RETURNING *")
 	rows, err := r.DBI(ctx).QueryContext(ctx, q.String(), args...)
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.ProductReservation{}
-	for rows.Next() {
-		p := &entity.ProductReservation{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.ProductReservation](rows)
 }
 
 func (r *ReservationsRepository) DeleteReservation(ctx context.Context, ids ...entity.PK) error {
@@ -116,6 +100,7 @@ func (r *ReservationsRepository) DeleteReservation(ctx context.Context, ids ...e
 
 type IReservationsRepository interface {
 	GetReservationByProduct(ctx context.Context, productIDs ...entity.PK) ([]*entity.ProductReservation, error)
+	GetReservationByStorage(ctx context.Context, storageIDs ...entity.PK) ([]*entity.ProductReservation, error)
 	GetReservation(ctx context.Context, id entity.PK) (*entity.ProductReservation, error)
 	CreateReservation(ctx context.Context, reservations ...*entity.ProductReservation) ([]*entity.ProductReservation, error)
 	UpdateReservation(ctx context.Context, reservations ...*entity.ProductReservation) ([]*entity.ProductReservation, error)

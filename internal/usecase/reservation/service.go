@@ -49,8 +49,8 @@ func (s *Service) ReserveProducts(ctx context.Context, req ReserveProductsReq) e
 		if !ok {
 			return errors.New("cannot find reservation data by product id, returned by added reservations (debug)")
 		}
-		res, ok := algo.Find(reservations, func(r *entity.ProductReservation) bool {
-			return r.StorageID == r.StorageID
+		res, ok := algo.Find(reservations, func(_r *entity.ProductReservation) bool {
+			return _r.StorageID == r.StorageID
 		})
 		if ok {
 			// create an entity that will be updated to new amount

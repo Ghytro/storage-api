@@ -47,15 +47,15 @@ func (r *StoredProductRepository) GetStorageDataByProduct(ctx context.Context, p
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.StoredProduct{}
-	for rows.Next() {
-		sp := &entity.StoredProduct{}
-		if err := sp.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, sp)
+	return entity.ScannedRows[*entity.StoredProduct](rows)
+}
+
+func (r *StoredProductRepository) GetStorageDataByStorage(ctx context.Context, storageIDs ...entity.PK) ([]*entity.StoredProduct, error) {
+	rows, err := r.DBI(ctx).QueryContext(ctx, "SELECT * FROM stored_products WHERE storage_id IN ($1)", storageIDs)
+	if err != nil {
+		return nil, err
 	}
-	return result, nil
+	return entity.ScannedRows[*entity.StoredProduct](rows)
 }
 
 func (r *StoredProductRepository) CreateStorageData(ctx context.Context, data ...*entity.StoredProduct) ([]*entity.StoredProduct, error) {
@@ -72,15 +72,7 @@ func (r *StoredProductRepository) CreateStorageData(ctx context.Context, data ..
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.StoredProduct{}
-	for rows.Next() {
-		sp := &entity.StoredProduct{}
-		if err := sp.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, sp)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.StoredProduct](rows)
 }
 
 func (r *StoredProductRepository) UpdateStorageData(ctx context.Context, data ...*entity.StoredProduct) ([]*entity.StoredProduct, error) {
@@ -90,23 +82,15 @@ func (r *StoredProductRepository) UpdateStorageData(ctx context.Context, data ..
 	FROM (VALUES `)
 	argB := argBuilder{}
 	for _, r := range data {
-		argB.add(r.StorageID, r.ProductID, r.Amount)
+		argB.add(r.ID, r.Amount)
 	}
 	expr, args := argB.done()
-	q.WriteString(expr + ") AS c (storage_id, product_id, amount) WHERE c.storage_id = sp.storage_id AND c.product_id = sp.product_id RETURNING *")
+	q.WriteString(expr + ") AS c (id, amount) WHERE c.id = sp.id RETURNING *")
 	rows, err := r.DBI(ctx).QueryContext(ctx, q.String(), args...)
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.StoredProduct{}
-	for rows.Next() {
-		p := &entity.StoredProduct{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.StoredProduct](rows)
 }
 
 func (r *StoredProductRepository) DeleteStorageData(ctx context.Context, ids ...entity.PK) error {
@@ -117,6 +101,7 @@ func (r *StoredProductRepository) DeleteStorageData(ctx context.Context, ids ...
 type IStoredProductRepository interface {
 	GetStorageData(ctx context.Context, id entity.PK) (*entity.StoredProduct, error)
 	GetStorageDataByProduct(ctx context.Context, productIDs ...entity.PK) ([]*entity.StoredProduct, error)
+	GetStorageDataByStorage(ctx context.Context, storageIDs ...entity.PK) ([]*entity.StoredProduct, error)
 	CreateStorageData(ctx context.Context, data ...*entity.StoredProduct) ([]*entity.StoredProduct, error)
 	UpdateStorageData(ctx context.Context, data ...*entity.StoredProduct) ([]*entity.StoredProduct, error)
 	DeleteStorageData(ctx context.Context, ids ...entity.PK) error

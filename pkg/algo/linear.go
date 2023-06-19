@@ -45,3 +45,15 @@ func Filter[T any](collection []T, iteratee func(item T, idx int) bool) []T {
 	}
 	return result
 }
+
+func UniqBy[T any, T1 comparable](collection []T, iteratee func(item T) T1) []T {
+	m := map[T1]T{}
+	for _, el := range collection {
+		m[iteratee(el)] = el
+	}
+	result := make([]T, 0, len(m))
+	for _, v := range m {
+		result = append(result, v)
+	}
+	return result
+}

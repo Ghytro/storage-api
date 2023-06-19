@@ -42,15 +42,7 @@ func (r *ProductRepository) ListProducts(ctx context.Context, filter *ListProduc
 		return nil, err
 	}
 
-	result := []*entity.Product{} // задать capacity
-	for rows.Next() {
-		p := &entity.Product{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.Product](rows)
 }
 
 func (r *ProductRepository) GetProduct(ctx context.Context, id entity.PK) (*entity.Product, error) {
@@ -76,15 +68,7 @@ func (r *ProductRepository) GetProducts(ctx context.Context, id ...entity.PK) ([
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.Product{}
-	for rows.Next() {
-		p := &entity.Product{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.Product](rows)
 }
 
 func (r *ProductRepository) CreateProduct(ctx context.Context, products ...*entity.Product) ([]*entity.Product, error) {
@@ -101,15 +85,7 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, products ...*enti
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.Product{}
-	for rows.Next() {
-		p := &entity.Product{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.Product](rows)
 }
 
 func (r *ProductRepository) UpdateProduct(ctx context.Context, products ...*entity.Product) ([]*entity.Product, error) {
@@ -129,15 +105,7 @@ func (r *ProductRepository) UpdateProduct(ctx context.Context, products ...*enti
 	if err != nil {
 		return nil, err
 	}
-	result := []*entity.Product{}
-	for rows.Next() {
-		p := &entity.Product{}
-		if err := p.Scan(rows); err != nil {
-			return nil, err
-		}
-		result = append(result, p)
-	}
-	return result, nil
+	return entity.ScannedRows[*entity.Product](rows)
 }
 
 func (r *ProductRepository) DeleteProduct(ctx context.Context, ids ...entity.PK) error {
