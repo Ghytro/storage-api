@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/rpc"
+	"storageapi/internal/api"
 	"storageapi/internal/api/reservation"
 	"storageapi/internal/api/storage"
 	"storageapi/internal/config"
@@ -31,8 +32,11 @@ func serve() *rpc.Server {
 	storageService := storageService.NewService(repo, sugar)
 	reservationService := reservationService.NewService(repo, sugar)
 
-	storageApi := storage.NewAPI(sugar, storageService)
-	reservationApi := reservation.NewAPI(sugar, reservationService)
+	apiConf := api.ApiConf{
+		RequestHandleTimeout: config.RequestHandleTimeout,
+	}
+	storageApi := storage.NewAPI(sugar, storageService, apiConf)
+	reservationApi := reservation.NewAPI(sugar, reservationService, apiConf)
 	server := newServer(storageApi, reservationApi)
 	return server
 }
