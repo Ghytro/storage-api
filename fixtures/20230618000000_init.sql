@@ -3,7 +3,7 @@
 
 CREATE TABLE storages (
     id BIGSERIAL PRIMARY KEY,
-    is_available BOOLEAN NOT NULL DEFAULT TRUE,
+    is_available BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE products (

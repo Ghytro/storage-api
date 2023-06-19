@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  app:
+    container_name: dockerdev-app
+    build:
+      context: ../
+      dockerfile: ./deployments/Dockerfile
+      target: prod
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: "postgres://postgres:password@db:5432/postgres?sslmode=disable&"
+      LISTENER_PORT: 3001
+      REQUEST_HANDLE_TIMEOUT_MS: 3000
+    depends_on:
+      - db
+  
+  db:
+    container_name: dockerdev-db
+    image: postgres:15.3-alpine3.18
+    environment:
+      POSTGRES_PASSWORD: password

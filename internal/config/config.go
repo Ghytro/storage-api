@@ -10,6 +10,8 @@ import (
 var DatabaseURL = os.Getenv("DATABASE_URL")
 var ListenerPort int
 var RequestHandleTimeout time.Duration
+var FixturesPath = "./fixtures"
+var MigrationDialect = "postgres"
 
 func init() {
 	var err error

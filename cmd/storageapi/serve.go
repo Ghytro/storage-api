@@ -12,6 +12,8 @@ import (
 	reservationService "storageapi/internal/usecase/reservation"
 	storageService "storageapi/internal/usecase/storage"
 
+	_ "github.com/lib/pq"
+	"github.com/pressly/goose"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -19,6 +21,13 @@ import (
 func serve() *rpc.Server {
 	db, err := database.NewDBWithPgx(config.DatabaseURL)
 	if err != nil {
+		log.Fatal(err)
+	}
+	migrateDB, err := goose.OpenDBWithDriver(config.MigrationDialect, config.DatabaseURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := goose.Run("up", migrateDB, config.FixturesPath); err != nil {
 		log.Fatal(err)
 	}
 	logger, err := zap.NewDevelopment(zap.AddStacktrace(zapcore.FatalLevel))
