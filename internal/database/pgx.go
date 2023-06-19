@@ -11,8 +11,14 @@ type DB struct {
 	*pgx.ConnPool
 }
 
-func NewDBWithPgx(conf pgx.ConnPoolConfig) (*DB, error) {
-	conn, err := pgx.NewConnPool(conf)
+func NewDBWithPgx(url string) (*DB, error) {
+	conf, err := pgx.ParseURI(url)
+	if err != nil {
+		return nil, err
+	}
+	conn, err := pgx.NewConnPool(pgx.ConnPoolConfig{
+		ConnConfig: conf,
+	})
 	if err != nil {
 		return nil, err
 	}
